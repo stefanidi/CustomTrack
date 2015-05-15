@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <style>
+html { 
+  color: #333;
+  font-family: sans-serif;
+  font-size: 16pt;
+  font-weight: 100;
+  line-height: 1.5em;
+}
+h1, h2 { text-align:center; }
+h2 { font-size:1.2em; margin-top:20px; margin-bottom:10px; }
+.hot { color:#ec1e1e; }
+.demo-wrapper { height:400px; width:1230px; background:rgba(0,0,0,.03); border:3px solid black; background-image: url(grocery_store_layout.png);  }
+.heatmap { width:100%; height:100%; }
+.btn { background:#ec1e1e; padding:10px; border:none; color:white; cursor:pointer; margin-left:5px; }
+.trigger-refresh, .thankyou, .trigger-reconfig { float:right; }
+.trigger-refresh, .trigger-reconfig { margin-top:10px; }
+
+.breadcrumb-trail { margin-bottom:10px;}
+    </style>
+    <script src="/js/heatmap.min.js"></script>
+  </head>
+  <body>
+   <div class="demo-wrapper">
+      <div class="heatmap">
+
+      </div>
+    </div>
+	  <button class="trigger-refresh btn">Add data</button>
+
+      <!-- Script -->
+      <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+      <script src="http://ajax.aspnetcdn.com/ajax/signalr/jquery.signalr-2.0.0.min.js"></script>
+      <script src="/SignalR/hubs"></script>
+
+      <script type="text/javascript">
+          $(function () {
+              $.connection.hub.url = "/SignalR";
+
+              var devLogger = $.connection.devLoggerHub;
+
+              devLogger.client.addPoint = function (point) {
+                  heatmapInstance.addData({ x: point, y: 140 });
+              };
+
+              $.connection.hub.start().done(function () {
+                  $('#status').html("Connected to the server, listening to log messages:");
+              });
+
+
+
+
+              //HEAT MAP
+              function generateRandomData(len) {
+                  // generate some random data
+                  var points = [];
+                  var max = 0;
+                  var width = 840;
+                  var height = 400;
+
+                  while (len--) {
+                      var val = Math.floor(Math.random() * 100);
+                      max = Math.max(max, val);
+                      var point = {
+                          x: Math.floor(Math.random() * width),
+                          y: Math.floor(Math.random() * height),
+                          value: val
+                      };
+                      points.push(point);
+                  }
+
+                  //var data = { max: max, data: points };
+                  var data = { max: 10, data: [{ x: 50, y: 140 }] };
+                  return data;
+              }
+
+              var heatmapInstance = h337.create({
+                  container: document.querySelector('.heatmap')
+              });
+
+              // generate 200 random datapoints
+              var data = generateRandomData(1);
+              heatmapInstance.setData(data);
+              var i = 1;
+              document.querySelector('.trigger-refresh').onclick = function () {
+                  if (i < 100) {
+                      i = i + 10;
+                  }
+                  heatmapInstance.addData({ x: 50 + i, y: 140 });
+              };
+          });
+      </script>
+
+  </body>
+  
+</html>

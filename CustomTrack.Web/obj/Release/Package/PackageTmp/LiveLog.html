@@ -1,0 +1,62 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>Roman Stefanidi's Live Logger - DEV © Roman Stefaidi</title>
+    <style type="text/css">
+        .header {
+            margin-top: 20px;
+            margin-left: 10px;
+            font-weight: bold;
+        }
+
+        .container {
+            background-color: #99CCFF;
+            border: thick solid #808080;
+            padding: 20px;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header"> 
+        <span id="status">Connecting...</span>
+        <select id="levelSelect" name="levelSelect">
+            <option value="*" selected>All</option>
+            <option value="Debug">Debug</option>
+            <option value="Error">Error</option>
+            <option value="Trace">Trace</option>
+        </select>
+    </div>
+    
+    <div class="container">
+        <p id="discussion" style="line-height: 20px;"></p>
+    </div>
+
+    <!-- Script -->
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+    <script src="http://ajax.aspnetcdn.com/ajax/signalr/jquery.signalr-2.0.0.min.js"></script>
+    <script src="/SignalR/hubs"></script>
+
+    <script type="text/javascript">
+        $(function () {
+            $.connection.hub.url = "/SignalR";
+
+            var devLogger = $.connection.devLoggerHub;
+
+            devLogger.client.addTrace = function (time, level, message) {
+                if($('#levelSelect').val() == "*" | $('#levelSelect').val() == level){
+                    var encodedTime = $('<div />').text(time).html();
+                    var encodedLevel = $('<div />').text(level).html();
+                    var encodedMsg = $('<div />').text(message).html();
+
+                    $('#discussion').prepend(encodedTime + '(<strong>' + encodedLevel + '</strong>)' + ':&nbsp;&nbsp;' + encodedMsg + '</br>');
+                }
+            };
+
+            $.connection.hub.start().done(function () {
+                $('#status').html("Connected to the server, listening to log messages:");
+            });
+        });
+    </script>
+</body>
+</html>
